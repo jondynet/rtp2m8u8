@@ -1,0 +1,70 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<form class="form-horizontal" name="loginform" action="" method="POST">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <fieldset>
+    <legend style="text-align:center">用户登陆</legend>
+    <div class="row-fluid">
+      <div class="span2"> </div>
+      <div class="span10">
+        <div class="control-group">
+          <label class="control-label" for="id_username">用户名</label>
+          <div class="controls">
+            <input id="id_username" type="text" name="username">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="id_password">密码</label>
+          <div class="controls">
+            <input type="password" name="password">
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <button id="submit" type="submit" class="btn btn-primary" data-loading-text="登陆中...">登陆</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="controls">
+            <a href="/register/">注册新用户</a>
+            <a href="/password_reset/">忘记密码</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form>
+{% end %}
+
+{% block script %}
+<script type="text/javascript">
+  document.getElementById('id_username').focus();
+</script>
+<script type="text/javascript">
+  $("form[name=loginform]").submit(function(){
+      $("#submit").button('loading');
+      console.log($(this).serialize());
+      $.ajax({
+          type: "post",
+          url: "/login/",
+          cache: false,
+          data:$(this).serialize(),
+          dataType: 'json',
+          success: function(resp){
+            if (resp.code == 1){
+              //alert(resp.msg);
+              console.log(resp.redirect_to);
+              window.location.href=resp.redirect_to;
+            }else{
+              alert(resp.msg);
+              $("#submit").button('reset');
+            }
+          }
+        });
+      return false;
+  });
+</script>
+{% end %}

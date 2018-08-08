@@ -1,0 +1,129 @@
+{% extends "index.html" %}
+
+{% block header %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css">
+{% end %}
+
+{% block content %}
+<ul class="breadcrumb">
+    <li class="pull-right">
+        <button class="btn btn-xs btn-primary btn-add">添加频道</button>
+    </li>
+    <li><a href="/">首页</a></li>
+    <li class="active">频道管理</li>
+</ul>
+
+<table class="table table-striped table-bordered">
+    <tr>
+        <th>#</th>
+        <th>名称</th>
+        <th>RTP 地址</th>
+        <th>M3U8 地址</th>
+        <th>管理</th>
+    </tr>
+{% for obj in objs %}
+    <tr>
+        <td> {{ obj.id }} </td>
+        <td> {{ obj.name }} </td>
+        <td> {{ obj.rtp }} </td>
+        <td> {{ obj.m3u8 }} </td>
+        <td>
+            <button class="btn btn-xs btn-info btn-edit" data-pk="{{ obj.id }}">编辑</button>
+			<button class="btn btn-xs btn-danger btn-delete" data-pk="{{ obj.id }}">删除</button>
+        </td>
+    </tr>
+{% end %}
+</table>
+
+<button class="btn btn-primary btn-add">添加频道</button>
+
+
+<div id="modalEdit" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="gridSystemModalLabel">频道设置</h4>
+      </div>
+      <div class="modal-body">
+<form id="id_form">
+  <div class="form-group">
+    <label for="id_name">频道名称</label>
+    <input type="hidden" id="id_pk" name="id" value="" />
+    <input class="form-control" id="id_name" name="name" value="" placeholder="name" />
+  </div>
+  <div class="form-group">
+    <label for="id_rtp">RTP 地址</label>
+    <input class="form-control" id="id_rtp" name="rtp" value="" placeholder="name" />
+  </div>
+  <div class="form-group">
+    <label for="id_m3u8">M3U8 地址</label>
+    <input class="form-control" id="id_m3u8" name="m3u8" value="" placeholder="name" />
+    <p class="help-block">m3u8 文件名只能为字母数字及下划线.</p>
+  </div>
+</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary btn-submit">保存</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+ 
+{% end %}
+
+{% block script %}
+<script>
+$(".btn-delete").click(function(e) {
+	pk = $(this).data('pk');
+	$.ajax({
+		url: '/channel/',
+		type:"delete",
+		dataType:"json",
+		data: {pk: pk},
+		timeout:5000,
+		success:function(msg){
+			// callback(msg);
+            $(e.target).parents('tr').remove();
+		},
+		error:function(xhr,textstatus,thrown){
+            alert('network err');
+		}
+	});
+});
+$(".btn-submit").click(function(e) {
+	data = $("#id_form").serialize();
+    console.log(data);
+	$.ajax({
+		url: '/channel/',
+		type: "post",
+		dataType:"json",
+		data: data,
+		timeout:5000,
+		success:function(msg){
+			// callback(msg);
+            window.location.reload();
+		},
+		error:function(xhr,textstatus,thrown){
+            alert('network err');
+		}
+	});
+});
+$(".btn-edit").click(function(e) {
+    tds = $(this).parents("tr").find("td");
+    $("#id_pk").val($(this).data('pk'));
+    $("#id_name").val(tds[1].innerText);
+    $("#id_rtp").val(tds[2].innerText);
+    $("#id_m3u8").val(tds[3].innerText);
+	$('#modalEdit').modal('show');
+});
+$(".btn-add").click(function(e) {
+    $("#id_pk").val('');
+    $("#id_name").val('');
+    $("#id_rtp").val('');
+    $("#id_m3u8").val('');
+	$('#modalEdit').modal('show');
+});
+</script>
+{% end %}
